@@ -11,9 +11,11 @@ from shapely.geometry import Polygon,Point,MultiPoint
 from sys import argv
 from geocube.api.core import make_geocube
 import matplotlib.pyplot as plt
-
+import os
 from pycartogram import Cartogram
 
+if not "DISPLAY" in os.environ or not os.environ["DISPLAY"]:
+    plt.switch_backend('agg')
 
 def parse_mobility_csv(fname):
     output = defaultdict(lambda : defaultdict(int))
