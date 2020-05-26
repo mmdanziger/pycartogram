@@ -10,6 +10,7 @@ from shapely.affinity import affine_transform
 from shapely.geometry import Polygon,Point,MultiPoint
 from sys import argv
 from geocube.api.core import make_geocube
+import matplotlib.pyplot as plt
 
 from pycartogram import Cartogram
 
@@ -76,6 +77,10 @@ if __name__ == "__main__":
         mc.run_cart_on_density_map()
         log_step("Loading cart results")
         mc.load_interpolated_output()
+        plt.figure(figsize=np.round(12*np.array(mc.padded_im.shape)/max(mc.padded_im.shape)))
+        mc.plot_density_map()
+        plt.savefig(cartogram_polygon_fname.rstrip(".geojson")+".png")
+        plt.close()
         mc.calculate_grid_transforms()
         log_step("Transforming polygons")
         original_df = mc.polygon_df.copy()

@@ -3,6 +3,7 @@ import pandas as pd
 import geopandas as gpd
 import imageio
 import numpy as np
+import matplotlib.pyplot as plt
 from subprocess import call,Popen,PIPE
 from scipy.ndimage import gaussian_filter
 from scipy.interpolate import RectBivariateSpline
@@ -71,11 +72,25 @@ class Cartogram(object):
     def load_interpolated_output(self):
         cart_out = np.loadtxt(self.transformed_density_fname)
         load_shape = (self.padded_im.shape[0]+1,self.padded_im.shape[1]+1)
-        xcart=np.reshape(cart_out[:,0],load_shape,order="C")
-        ycart=np.reshape(cart_out[:,1],load_shape,order="C")
-        self.gridx = RectBivariateSpline(np.arange(self.padded_im.shape[0]+1),np.arange(self.padded_im.shape[1]+1),xcart)
-        self.gridy = RectBivariateSpline(np.arange(self.padded_im.shape[0]+1),np.arange(self.padded_im.shape[1]+1),ycart)
-        
+        self.xcart=np.reshape(cart_out[:,0],load_shape,order="C")
+        self.ycart=np.reshape(cart_out[:,1],load_shape,order="C")
+        self.gridx = RectBivariateSpline(np.arange(self.padded_im.shape[0]+1),np.arange(self.padded_im.shape[1]+1),self.xcart)
+        self.gridy = RectBivariateSpline(np.arange(self.padded_im.shape[0]+1),np.arange(self.padded_im.shape[1]+1),self.ycart)
+
+    def plot_density_map(self,include_transform=True):
+        plt.imshow(self.padded_im,origin="lower")
+        if include_transform:
+            try:
+                _ = self.xcart
+            except:
+                raise ValueError("Load data first")
+            plt.plot(self.xcart,self.ycart,',',color="orange",alpha=0.3)
+        plt.xticks([])
+        plt.yticks([])
+        plt.tight_layout()
+        plt.axis("equal")
+            
+
     def calculate_grid_transforms(self):
         minx,miny,maxx,maxy=self.polygon_df.total_bounds
         #interp coordinates based on array indexing, opposite of image
