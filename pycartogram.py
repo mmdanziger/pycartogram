@@ -11,7 +11,8 @@ from shapely.affinity import affine_transform
 from shapely.geometry import Polygon,Point,MultiPoint,MultiPolygon
 from sys import argv
 from geocube.api.core import make_geocube
-
+import tempfile
+import atexit
 
 def log_step(stepname):
     #todo : add logging timing etc.
@@ -29,7 +30,19 @@ class Cartogram(object):
         self.projection = "EPSG:6539"#"EPSG:4326"
         self.data_key = "devices"
         self.no_data_to_ocean = False
+        self.generate_temp_files()
     
+    def generate_temp_files(self):
+        self.density_map = tempfile.NamedTemporaryFile()
+        self.transformed_density = tempfile.NamedTemporaryFile()
+        self.density_map_fname = self.density_map.name 
+        self.transformed_density_fname = self.transformed_density.name
+
+    @atexit.register
+    def delete_temp_files(self):
+        self.density_map.close()
+        self.transformed_density.close()
+
     def load_polygon_df(self,fname,join_index):
         self.polygon_df = gpd.read_file(fname).to_crs(self.projection).set_index(join_index)
     
