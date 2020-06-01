@@ -21,8 +21,6 @@ def log_step(stepname):
 class Cartogram(object):
     def __init__(self):
         self.data_df = None
-        self.density_map_fname = "/tmp/nyc.dat"
-        self.transformed_density_fname = "/tmp/nyc_out.dat"
         self.pad_width = (200,200)
         self.imsize = (500,600)
         self.path_to_cart = "/home/micha/devsnaps/cart-1.2.2/cart"
@@ -30,7 +28,8 @@ class Cartogram(object):
         self.projection = "EPSG:6539"#"EPSG:4326"
         self.data_key = "devices"
         self.no_data_to_ocean = False
-        self.generate_temp_files()
+        self.density_map_fname = "/tmp/nyc.dat"
+        self.transformed_density_fname = "/tmp/nyc_out.dat"
     
     def generate_temp_files(self):
         self.density_map = tempfile.NamedTemporaryFile()
@@ -38,7 +37,6 @@ class Cartogram(object):
         self.density_map_fname = self.density_map.name 
         self.transformed_density_fname = self.transformed_density.name
 
-    @atexit.register
     def delete_temp_files(self):
         self.density_map.close()
         self.transformed_density.close()
@@ -61,12 +59,15 @@ class Cartogram(object):
         self.polygon_df = df_joined
         
 
-    def create_geocube_density_map(self):
-        minx,miny,maxx,maxy=self.polygon_df.total_bounds
-        r = ((maxx - minx) / self.imsize[0])
-        print(r)
-        self.geocube_resolution = (r,r)
-        self.gc = make_geocube(self.polygon_df, [self.data_key],resolution=self.geocube_resolution)
+    def create_geocube_density_map(self,like=None):
+        if like is None:
+            minx,miny,maxx,maxy=self.polygon_df.total_bounds
+            r = ((maxx - minx) / self.imsize[0])
+            print(r)
+            self.geocube_resolution = (r,r)
+            self.gc = make_geocube(self.polygon_df, [self.data_key],resolution=self.geocube_resolution)
+        else:
+            self.gc = make_geocube(self.polygon_df, [self.data_key],like=like)
         im = self.gc.to_array().data[0]
         im = np.nan_to_num(im,nan=self.mean_val)
         self.imsize = im.shape
@@ -141,8 +142,8 @@ class Cartogram(object):
                 return transform_polygon(x)
             else:
                 raise NotImplementedError(f"Geometry type : {x.type} is not implemented")
-        self.polygon_df["old geometry"] = self.polygon_df.geometry
-        self.polygon_df["geometry"] = self.polygon_df.geometry.apply(transform_polygon_or_multipolygon)
+        #self.polygon_df["old geometry"] = self.polygon_df.geometry
+        self.polygon_df = self.polygon_df.set_geometry(self.polygon_df.geometry.apply(transform_polygon_or_multipolygon))
 
     def _test_affine_transforms(self):
         to_and_from = lambda x: affine_transform( affine_transform(x, self.to_grid),self.from_grid)
