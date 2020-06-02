@@ -10,7 +10,7 @@ import dateutil
 plot_types = ["original_data","deformation_on_original_data","deformation_on_deformed_data","deformation_only"]
 
 def get_data_to_plot(dt,base_dir="/tmp/"):
-    timestring = dt.isoformat()
+    timestring =dt.isoformat()
     globstring = join(base_dir,f"mobility_cartogram_{timestring}*")
     density_fname, cartogram_ct_fname, _, cartogram_bg_fname, out_fname, density_transformed_fname = sorted(glob(globstring))
     im1 = np.loadtxt(density_fname)
@@ -74,3 +74,4 @@ if __name__ == "__main__":
     while dt<=last_date:
         plot_cartogram_data(dt,base_dir)
         dt+=step
+
