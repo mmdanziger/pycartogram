@@ -62,7 +62,7 @@ def custom_join(polygon_df,data_df,data_key="devices"):
     df_devices[data_key] = df_devices[data_key] / df_devices.area
     mean_val = df_devices[df_devices.ALAND > 0][data_key].mean()
     df_devices.loc[(df_devices.ALAND <= 0, data_key)] = mean_val
-    df_devices.loc[(df_devices[data_key].isna(), data_key)] = 0
+    df_devices.loc[(df_devices[data_key].isna(), data_key)] = mean_val
     return df_devices, mean_val
     
 

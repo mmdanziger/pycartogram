@@ -7,7 +7,7 @@ from subprocess import call
 from sys import argv
 import dateutil
 
-plot_types = ["original_data","deformation_on_original_data","deformation_on_deformed_data","deformation_only"]
+plot_types = ["original_data","deformation_on_original_data","deformation_on_deformed_data","deformation_only","deformation_only_cropped"]
 
 def get_data_to_plot(dt,base_dir="/tmp/"):
     timestring =dt.isoformat()
@@ -28,6 +28,15 @@ def plot_cartogram_data(dt,base_dir):
     im1,im2,xcart,ycart,global_avg,weight=get_data_to_plot(dt,base_dir)
     n=plt.Normalize(vmin=0,vmax=2*global_avg)
     n=plt.Normalize(vmin=0,vmax=np.percentile(im1.flatten(),99))
+    mask = np.zeros_like(xcart)
+    xy = np.array([xcart,ycart]).round().astype(int)
+    for i in range(xcart.shape[0]):
+        for j in range(xcart.shape[1]):
+            ii,jj=[xy[1,i,j],xy[0,i,j]]
+            if ii==im2.shape[0] or jj==im2.shape[1] or np.isclose(im2[ii,jj],im2[0,0],atol=1e-12):
+                mask[i,j]=1
+    xcm=np.ma.masked_array(data=xcart,mask=mask.astype(bool))
+    ycm=np.ma.masked_array(data=ycart,mask=mask.astype(bool))
     global plot_types
     for plot_type in plot_types:
         fig = plt.figure(frameon=False)
@@ -50,6 +59,9 @@ def plot_cartogram_data(dt,base_dir):
         elif plot_type == "deformation_only":
             ax.imshow(im2*0,origin="lower",aspect="equal",cmap="inferno")
             ax.plot(xcart,ycart,',',color="orange",alpha=0.2)
+        elif plot_type == "deformation_only_cropped":
+            ax.imshow(im2*0,origin="lower",aspect="equal",cmap="inferno")
+            ax.plot(xcm,ycm,',',color="orange",alpha=0.2)
         ax.text(0.1, 0.9, dt.strftime("%a, %b %d, %I%p"), bbox=dict(facecolor='black', alpha=0.9),transform=ax.transAxes,color="darkgray",fontdict={"size":10})            
         ofname = join(output_dir, plot_type, f"mobility_cartogram_{dt.isoformat()}_{plot_type}.png")
         fig.savefig(ofname, dpi=dpi)
