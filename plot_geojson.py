@@ -22,7 +22,7 @@ def plot_geojson(fname):
     gdf = gdf.set_geometry(gdf.rotate(28.5, origin=origin))
 
     f, a = plt.subplots(figsize=(fig_w,fig_h),frameon=False)
-    ts=basename(fname).split("_")[-2]
+    ts=basename(fname).split("_")[2]
     print(ts)
     dt = dateutil.parser.parse(ts)
 
