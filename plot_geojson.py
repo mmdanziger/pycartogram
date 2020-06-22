@@ -32,6 +32,7 @@ def plot_geojson(fname):
     a.axis("off")
     ofname=".".join(basename(fname).split(".")[:-1])+".png"
     plt.savefig(ofname,dpi=300)
+    plt.close()
     return 1
 
 with Pool() as pool:
