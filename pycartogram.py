@@ -123,7 +123,7 @@ class Cartogram(object):
         
         self.to_grid = to_grid
         self.from_grid = from_grid
-        
+  
     def get_cartogram_transformed_data(self):    
         def transform_point(p):
             px,py = p.coords[0]
@@ -144,7 +144,31 @@ class Cartogram(object):
                 raise NotImplementedError(f"Geometry type : {x.type} is not implemented")
         #self.polygon_df["old geometry"] = self.polygon_df.geometry
         self.polygon_df = self.polygon_df.set_geometry(self.polygon_df.geometry.apply(transform_polygon_or_multipolygon))
+        
+    def save_transform_data(self,ofname):
+        output_dict = {}
+        output_dict["imsize"] = self.imsize
+        output_dict["pad_width"] = self.pad_width
+        output_dict["total_bounds"] = self.polygon_df.total_bounds
+        output_dict["padded_im_shape"] = self.padded_im.shape
+        output_dict["to_grid"] = self.to_grid
+        output_dict["from_grid"] = self.from_grid
+        output_dict["crs"] = self.projection
+        output_dict["mean_val"] = self.mean_val
+        json.dump(output_dict, open(ofname,"w"))
+    
+    def load_transform_data(self,fname)
+        input_dict = json.load(open(fname))
+        self.imsize = input_dict["imsize"] 
+        self.pad_width = input_dict["pad_width"] 
+        self.polygon_df.total_bounds = input_dict["total_bounds"] 
+        self.padded_im.shape = input_dict["padded_im_shape"] 
+        self.to_grid = input_dict["to_grid"] 
+        self.from_grid = input_dict["from_grid"] 
+        self.projection = input_dict["crs"] 
+        self.mean_val = input_dict["mean_val"] 
 
+      
     def _test_affine_transforms(self):
         to_and_from = lambda x: affine_transform( affine_transform(x, self.to_grid),self.from_grid)
         transformed_geometry = self.polygon_df.geometry.apply(to_and_from)
