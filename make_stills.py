@@ -7,7 +7,8 @@ from subprocess import call
 from sys import argv
 import dateutil
 
-plot_types = ["original_data","deformation_on_original_data","deformation_on_deformed_data","deformation_only","deformation_only_cropped"]
+plot_types = ["original_data","deformation_on_original_data","deformed_data_only","deformation_on_deformed_data","deformation_only","deformation_only_cropped"]
+plot_types = ["deformed_data_only"]
 
 def get_data_to_plot(dt,base_dir="/tmp/"):
     timestring =dt.isoformat()
@@ -56,6 +57,9 @@ def plot_cartogram_data(dt,base_dir):
             ax.imshow(im2*0,origin="lower",aspect="equal",cmap="inferno")
             ax.imshow(np.ma.masked_where(np.isclose(im2,im2[0][0],atol=1e-12),im2),origin="lower",aspect='equal',norm=n)
             ax.plot(xcart,ycart,',',color="orange",alpha=0.2)
+        elif plot_type == "deformed_data_only":
+            ax.imshow(im2*0,origin="lower",aspect="equal",cmap="inferno")
+            ax.imshow(np.ma.masked_where(np.isclose(im2,im2[0][0],atol=1e-12),im2),origin="lower",aspect='equal',norm=n)
         elif plot_type == "deformation_only":
             ax.imshow(im2*0,origin="lower",aspect="equal",cmap="inferno")
             ax.plot(xcart,ycart,',',color="orange",alpha=0.2)
@@ -70,7 +74,7 @@ def plot_cartogram_data(dt,base_dir):
 
 
 if __name__ == "__main__":
-    #plt.switch_backend('agg')
+    plt.switch_backend('agg')
 
     base_dir=argv[1]
     output_dir=argv[2]

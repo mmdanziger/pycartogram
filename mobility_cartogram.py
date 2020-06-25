@@ -49,7 +49,7 @@ def load_data_df(fname="/home/micha/mhbg_time.csv",freq="1H"):
     df.columns = ("bg","devices","time")
     df.time = df.time.apply(lambda x: datetime.datetime.strptime(x,"%Y-%m-%d %H:%M:%S"))
     df.devices = df.devices.apply(float)
-    df = df.loc[(df.time>=datetime.datetime(2020,3,2)) & (df.time < datetime.datetime(2020,5,1))]
+    df = df.loc[(df.time>=datetime.datetime(2020,1,1)) & (df.time < datetime.datetime(2020,5,26))]
     dfp = df.pivot("time","bg")
     dfadp=dfp.resample(freq).interpolate().fillna(0)
     return dfadp

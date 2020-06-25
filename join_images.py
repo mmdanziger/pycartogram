@@ -9,7 +9,7 @@ output_dir = argv[2]
 
 week1_start = datetime.datetime(2020,1,6)
 week2_start = datetime.timedelta(days=77) + week1_start
-week_jump = datetime.timedelta(days=14)
+week_jump = datetime.timedelta(days=77)
 current_time = week1_start
 frame_no=1
 while current_time < datetime.datetime(2020,3,17):
